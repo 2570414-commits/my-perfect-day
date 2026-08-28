@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Perfect Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dawn:#FFD9B3;
+    --morning:#8FD0EF;
+    --afternoon:#FFC857;
+    --sunset:#FF7B54;
+    --night:#1B1B3A;
+    --nighter:#100F26;
+    --paper:#FFFBF3;
+    --ink:#2B2440;
+    --ink-soft:#5B5470;
+    --accent:#FF7B54;
+    --line: rgba(43,36,64,0.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Karla', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    background: linear-gradient(180deg, var(--dawn) 0%, var(--morning) 100%);
+    transition: background 1.4s ease;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  body.stage-1{ background: linear-gradient(180deg, var(--morning) 0%, var(--afternoon) 100%); }
+  body.stage-2{ background: linear-gradient(180deg, var(--afternoon) 0%, var(--sunset) 100%); }
+  body.stage-3{ background: linear-gradient(180deg, var(--sunset) 0%, var(--night) 100%); color:#F4F1FA; }
+  body.stage-result{ background: linear-gradient(180deg, var(--night) 0%, var(--nighter) 100%); color:#F4F1FA; }
+
+  .stars{
+    position:fixed; inset:0; pointer-events:none; opacity:0; transition:opacity 1.2s ease;
+    z-index:0;
+  }
+  body.stage-3 .stars, body.stage-result .stars{ opacity:1; }
+  .star{
+    position:absolute; width:2px; height:2px; background:#fff; border-radius:50%;
+    animation: twinkle 3.2s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.25;} 50%{opacity:1;} }
+
+  header{
+    width:100%;
+    max-width:760px;
+    text-align:center;
+    padding: 40px 24px 8px;
+    z-index:1;
+  }
+  .eyebrow{
+    font-family:'Karla', sans-serif;
+    font-size:12px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  body.stage-3 .eyebrow, body.stage-result .eyebrow{ color:#C9C3E0; }
+  h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:clamp(32px, 6vw, 52px);
+    margin-top:6px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    font-size:15px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  body.stage-3 .sub, body.stage-result .sub{ color:#D8D3EA; }
+
+  .arc-wrap{
+    width:100%;
+    max-width:760px;
+    padding: 6px 16px 0;
+    z-index:1;
+  }
+  svg#arc{ width:100%; height:auto; display:block; }
+  .arc-label{
+    font-family:'Karla', sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    fill: var(--ink-soft);
+    transition: fill .6s ease;
+  }
+  body.stage-3 .arc-label, body.stage-result .arc-label{ fill:#B7B0D6; }
+  .arc-label.active{ fill: var(--ink); font-weight:700; }
+  body.stage-3 .arc-label.active, body.stage-result .arc-label.active{ fill:#fff; }
+  .arc-dot{ fill: rgba(43,36,64,0.25); transition: fill .5s ease, r .3s ease; }
+  .arc-dot.done{ fill: var(--accent); }
+  .arc-dot.active{ fill: var(--accent); r:6; }
+
+  main{
+    width:100%;
+    max-width:640px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding: 18px 24px 60px;
+    z-index:1;
+  }
+
+  .question{
+    font-family:'Fredoka', sans-serif;
+    font-size: clamp(20px, 3.4vw, 26px);
+    font-weight:500;
+    text-align:center;
+    margin: 22px 0 26px;
+  }
+
+  .options{
+    width:100%;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:520px){
+    .options{ grid-template-columns: 1fr; }
+  }
+
+  .option{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 20px 18px;
+    text-align:left;
+    cursor:pointer;
+    font-family:'Karla', sans-serif;
+    color: var(--ink);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    box-shadow: 0 1px 2px rgba(27,27,58,0.06);
+  }
+  .option:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(27,27,58,0.14);
+    border-color: var(--accent);
+  }
+  .option:active{ transform: translateY(-1px) scale(.99); }
+  .option .icon{ font-size:26px; }
+  .option .label{ font-weight:700; font-size:15px; line-height:1.35; }
+  .option:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+
+  .progress-track{
+    margin-top:34px;
+    display:flex;
+    gap:8px;
+  }
+  .progress-track span{
+    width:26px; height:5px; border-radius:3px;
+    background: rgba(43,36,64,0.18);
+    transition: background .3s ease;
+  }
+  .progress-track span.filled{ background: var(--accent); }
+
+  /* Result screen */
+  .result{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:18px;
+  }
+  .result .kicker{
+    font-size:12px; letter-spacing:.24em; text-transform:uppercase; color:#C9C3E0; font-weight:700;
+  }
+  .result h2{
+    font-family:'Fredoka', sans-serif;
+    font-size: clamp(34px, 7vw, 58px);
+    font-weight:600;
+  }
+  .result p.desc{
+    max-width:480px;
+    font-size:16px;
+    line-height:1.65;
+    color:#E4E0F2;
+  }
+  .timeline{
+    display:flex;
+    gap:14px;
+    margin-top:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .timeline .stop{
+    background: rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:14px;
+    padding:12px 14px;
+    min-width:120px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .timeline .stop .stage-name{
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#B7B0D6; font-weight:700;
+  }
+  .timeline .stop .icon{ font-size:24px; }
+  .timeline .stop .text{ font-size:12px; color:#E4E0F2; line-height:1.3; }
+
+  .palette{
+    display:flex;
+    width:100%;
+    max-width:420px;
+    height:14px;
+    border-radius:8px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .palette div{ flex:1; }
+
+  .replay{
+    margin-top:10px;
+    background: var(--accent);
+    color:#1B1B3A;
+    border:none;
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding: 13px 28px;
+    border-radius: 999px;
+    cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 8px 20px rgba(255,123,84,0.35);
+  }
+  .replay:hover{ transform: translateY(-2px); }
+  .replay:focus-visible{ outline:3px solid #fff; outline-offset:3px; }
+
+  footer{
+    font-size:11px;
+    color: rgba(43,36,64,0.45);
+    padding: 6px 24px 26px;
+    z-index:1;
+  }
+  body.stage-3 footer, body.stage-result footer{ color: rgba(244,241,250,0.4); }
+
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body class="stage-0">
+
+<div class="stars" id="stars"></div>
+
+<header>
+  <div class="eyebrow">A tiny day-building game</div>
+  <h1>My Perfect Day</h1>
+  <p class="sub" id="subline">Four choices. One day. Let's build it, moment by moment.</p>
+</header>
+
+<div class="arc-wrap">
+  <svg id="arc" viewBox="0 0 760 150" fill="none">
+    <path id="sunPath" d="M 40 130 Q 380 -30 720 130" stroke="rgba(43,36,64,0.18)" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/>
+    <circle id="sun" cx="40" cy="130" r="12" fill="#FFC857"/>
+    <g id="dots"></g>
+    <g id="labels"></g>
+  </svg>
+</div>
+
+<main id="main">
+
+  <section id="quiz">
+    <p class="question" id="questionText"></p>
+    <div class="options" id="optionsWrap"></div>
+    <div class="progress-track" id="progressTrack"></div>
+  </section>
+
+  <section id="resultSection" class="result" hidden>
+    <div class="kicker">Your perfect day is</div>
+    <h2 id="resultTitle"></h2>
+    <p class="desc" id="resultDesc"></p>
+    <div class="palette" id="resultPalette"></div>
+    <div class="timeline" id="resultTimeline"></div>
+    <button class="replay" id="replayBtn">Live it again</button>
+  </section>
+
+</main>
+
+<footer>Built for daydreaming. No two days are the same &mdash; pick differently and see what changes.</footer>
+
+<script>
+(function(){
+
+  const STAGE_NAMES = ["Morning","Afternoon","Evening","Night"];
+  const STAGE_COLORS = ["#FFD9B3","#8FD0EF","#FFC857","#FF7B54","#1B1B3A"]; // used for palette per stage choice
+
+  const STAGES = [
+    {
+      question: "How does your day begin?",
+      options: [
+        { icon:"🌅", label:"Sunrise run through the city", tags:{energy:1, adventure:1}, color:"#FFB37A" },
+        { icon:"☕", label:"Slow coffee, no alarm in sight", tags:{calm:1, comfort:1}, color:"#FFD9B3" },
+        { icon:"📞", label:"Breakfast call with your best friend", tags:{social:1, comfort:1}, color:"#FFCB9E" },
+        { icon:"📓", label:"Journaling by the window, in silence", tags:{solo:1, creative:1}, color:"#F6C6A0" },
+      ]
+    },
+    {
+      question: "What fills your afternoon?",
+      options: [
+        { icon:"🚗", label:"A road trip to somewhere new", tags:{adventure:1, energy:1}, color:"#8FD0EF" },
+        { icon:"📖", label:"Curling up with a good novel", tags:{calm:1, solo:1}, color:"#A9DEF2" },
+        { icon:"🧺", label:"Farmers market with old friends", tags:{social:1, comfort:1}, color:"#BEE7F5" },
+        { icon:"🎨", label:"Making something with your hands", tags:{creative:1, solo:1}, color:"#93D6E8" },
+      ]
+    },
+    {
+      question: "How do you drift toward evening?",
+      options: [
+        { icon:"💃", label:"Dancing until your feet hurt", tags:{energy:1, social:1}, color:"#FFC857" },
+        { icon:"🍲", label:"A quiet dinner you cooked yourself", tags:{calm:1, practical:1}, color:"#FFD98A" },
+        { icon:"✨", label:"Stargazing far from city lights", tags:{adventure:1, solo:1}, color:"#FFCE6E" },
+        { icon:"🎲", label:"Game night with people you love", tags:{social:1, comfort:1}, color:"#FFDDA0" },
+      ]
+    },
+    {
+      question: "How does the day come to rest?",
+      options: [
+        { icon:"🌇", label:"Watching the city hum from a rooftop", tags:{adventure:1, calm:1}, color:"#FF7B54" },
+        { icon:"🛏️", label:"Early to bed, ready for tomorrow", tags:{practical:1, comfort:1}, color:"#FF9270" },
+        { icon:"🗣️", label:"A deep conversation until 2am", tags:{social:1, creative:1}, color:"#FF8B65" },
+        { icon:"🌌", label:"Silence &mdash; just you and your thoughts", tags:{solo:1, calm:1}, color:"#F3785A" },
+      ]
+    }
+  ];
+
+  const ARCHETYPES = {
+    energy:   { title:"The Spark", emoji:"⚡", desc:"Your perfect day moves. It chases sunrises, dances through evenings, and never quite sits still &mdash; because stillness was never the point." },
+    calm:     { title:"The Slow Bloom", emoji:"🌸", desc:"Your perfect day is unhurried. It's savored a moment at a time, with nowhere urgent to be and nothing rushed about it." },
+    social:   { title:"The Gathering", emoji:"🎉", desc:"Your perfect day is best lived out loud. It's fuller with people in it &mdash; their noise, their company, their company again." },
+    solo:     { title:"The Quiet Orbit", emoji:"🌙", desc:"Your perfect day is charted alone, and better for it. Some of the best hours are the ones nobody else needs to understand." },
+    adventure:{ title:"The Wanderer", emoji:"🧭", desc:"Your perfect day goes looking for what it doesn't know yet. Comfort is nice; the unfamiliar is nicer." },
+    comfort:  { title:"The Homebody", emoji:"🏡", desc:"Your perfect day is built from small, familiar joys. It doesn't need to go far to feel complete." },
+    creative: { title:"The Maker", emoji:"🖌️", desc:"Your perfect day turns thoughts into something real. Ideas don't stay ideas for long around you." },
+    practical:{ title:"The Steady Hand", emoji:"🧭", desc:"Your perfect day is well-tended. There's quiet satisfaction in a day where everything got its due care." },
+  };
+
+  let stage = 0;
+  const axis = { energy:0, calm:0, social:0, solo:0, adventure:0, comfort:0, creative:0, practical:0 };
+  const choices = [];
+
+  const body = document.body;
+  const questionText = document.getElementById('questionText');
+  const optionsWrap = document.getElementById('optionsWrap');
+  const progressTrack = document.getElementById('progressTrack');
+  const quizSection = document.getElementById('quiz');
+  const resultSection = document.getElementById('resultSection');
+  const subline = document.getElementById('subline');
+  const sun = document.getElementById('sun');
+  const sunPath = document.getElementById('sunPath');
+  const dotsG = document.getElementById('dots');
+  const labelsG = document.getElementById('labels');
+
+  const pathLength = sunPath.getTotalLength();
+
+  // Build progress dots + labels on the arc
+  const dotEls = [];
+  const labelEls = [];
+  STAGE_NAMES.forEach((name, i) => {
+    const t = i / (STAGE_NAMES.length - 1);
+    const pt = sunPath.getPointAtLength(t * pathLength);
+    const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    dot.setAttribute("cx", pt.x);
+    dot.setAttribute("cy", pt.y + 22);
+    dot.setAttribute("r", 4);
+    dot.setAttribute("class","arc-dot");
+    dotsG.appendChild(dot);
+    dotEls.push(dot);
+
+    const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+    label.setAttribute("x", pt.x);
+    label.setAttribute("y", pt.y + 42);
+    label.setAttribute("text-anchor","middle");
+    label.setAttribute("class","arc-label");
+    label.textContent = name;
+    labelsG.appendChild(label);
+    labelEls.push(label);
+  });
+
+  // Progress track dots (below cards)
+  STAGE_NAMES.forEach(()=>{
+    const s = document.createElement('span');
+    progressTrack.appendChild(s);
+  });
+
+  function moveSun(t, isNight){
+    const pt = sunPath.getPointAtLength(t * pathLength);
+    sun.setAttribute("cx", pt.x);
+    sun.setAttribute("cy", pt.y);
+    sun.setAttribute("fill", isNight ? "#F4F1FA" : (t < 0.34 ? "#FFC857" : (t < 0.67 ? "#FFC857" : "#FF7B54")));
+    sun.style.transition = "cx 1s ease, cy 1s ease, fill .6s ease";
+  }
+
+  function updateArcVisual(){
+    dotEls.forEach((d, i) => {
+      d.classList.toggle('done', i < stage);
+      d.classList.toggle('active', i === stage);
+    });
+    labelEls.forEach((l, i) => l.classList.toggle('active', i === stage));
+  }
+
+  function render(){
+    body.className = 'stage-' + stage;
+    const s = STAGES[stage];
+    questionText.textContent = s.question;
+    optionsWrap.innerHTML = '';
+    s.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.innerHTML = `<span class="icon">${opt.icon}</span><span class="label">${opt.label}</span>`;
+      btn.addEventListener('click', () => choose(opt));
+      optionsWrap.appendChild(btn);
+    });
+    [...progressTrack.children].forEach((el, i) => el.classList.toggle('filled', i < stage));
+    moveSun(stage / (STAGE_NAMES.length - 1), false);
+    updateArcVisual();
+    subline.textContent = stage === 0
+      ? "Four choices. One day. Let's build it, moment by moment."
+      : `${stage} of ${STAGE_NAMES.length} moments chosen.`;
+  }
+
+  function choose(opt){
+    Object.keys(opt.tags).forEach(k => axis[k] += opt.tags[k]);
+    choices.push({ stageName: STAGE_NAMES[stage], icon: opt.icon, label: opt.label, color: opt.color });
+    stage++;
+    if (stage < STAGES.length){
+      render();
+    } else {
+      finish();
+    }
+  }
+
+  function finish(){
+    body.className = 'stage-result';
+    moveSun(1, true);
+    updateArcVisual();
+    dotEls.forEach(d => d.classList.add('done'));
+    labelEls.forEach(l => l.classList.remove('active'));
+    quizSection.hidden = true;
+    resultSection.hidden = false;
+    subline.textContent = "Your day, complete.";
+    spawnStars();
+
+    // find dominant axis
+    let bestKey = null, bestVal = -1;
+    Object.keys(axis).forEach(k => {
+      if (axis[k] > bestVal){ bestVal = axis[k]; bestKey = k; }
+    });
+    const arche = ARCHETYPES[bestKey];
+
+    document.getElementById('resultTitle').innerHTML = `${arche.emoji} ${arche.title}`;
+    document.getElementById('resultDesc').innerHTML = arche.desc;
+
+    const palette = document.getElementById('resultPalette');
+    palette.innerHTML = '';
+    choices.forEach(c => {
+      const sw = document.createElement('div');
+      sw.style.background = c.color;
+      palette.appendChild(sw);
+    });
+
+    const timeline = document.getElementById('resultTimeline');
+    timeline.innerHTML = '';
+    choices.forEach(c => {
+      const stop = document.createElement('div');
+      stop.className = 'stop';
+      stop.innerHTML = `<span class="stage-name">${c.stageName}</span><span class="icon">${c.icon}</span><span class="text">${c.label}</span>`;
+      timeline.appendChild(stop);
+    });
+  }
+
+  function spawnStars(){
+    const wrap = document.getElementById('stars');
+    if (wrap.children.length) return;
+    for(let i=0;i<60;i++){
+      const s = document.createElement('div');
+      s.className='star';
+      s.style.left = Math.random()*100 + 'vw';
+      s.style.top = Math.random()*70 + 'vh';
+      s.style.animationDelay = (Math.random()*3) + 's';
+      wrap.appendChild(s);
+    }
+  }
+
+  document.getElementById('replayBtn').addEventListener('click', () => {
+    stage = 0;
+    choices.length = 0;
+    Object.keys(axis).forEach(k => axis[k] = 0);
+    resultSection.hidden = true;
+    quizSection.hidden = false;
+    document.getElementById('stars').innerHTML = '';
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
